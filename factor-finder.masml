@@ -1,0 +1,28 @@
+SET-REGISTER  $1  27
+STORE         $1  &product
+
+# Initalize the loop.
+ADD           $1  1
+STORE         $1  &loop_until
+SET-REGISTER  $2  1
+
+# Calculate the reminder of product divided by factor (AKA $2).
+# Jump if the reminder is zero.
+LOAD          $1  &product
+MODULO        $1
+GOTO-IF-NOT   $1  13
+
+# Add one to factor; keep looping until factor > product.
+LOAD          $1  &loop_until
+ADD           $2  1
+EQUAL         $1
+GOTO-IF-NOT   $1  5
+# Exit if factor > product.
+EXIT
+
+# The reminder was zero.
+LOAD          $1  &product
+DIVIDE        $1
+PRINT         $2
+PRINT         $1
+GOTO              8
