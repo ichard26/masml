@@ -68,7 +68,7 @@ void free_char_ppbuf(char **ppbuf)
     free(ppbuf);
 }
 
-char **read_file(char *filepath)
+char **read_file(char const *filepath)
 {
     FILE *fp = fopen(filepath, "r");
     if (fp == NULL) {
@@ -117,7 +117,7 @@ BAIL:
     return NULL;
 }
 
-bool find_string(char *strings[], char *target, size_t *index)
+bool find_string(char * const strings[], char * const target, size_t *index)
 {
     for (*index = 0; strings[*index]; (*index)++) {
         if (strcmp(strings[*index], target) == 0) {
@@ -208,6 +208,24 @@ Program *parse(char *ppbuf[])
             }
         } else if (reg == NULL) {
             printf("[FATAL] %s at line %zu requires a register\n", stype, i);
+            goto BAIL;
+        }
+        if (type == LOAD || type == STORE || type == PRINT) {
+            if (arg && arg[0] != '&') {
+                printf("[FATAL] a constant is an unsupported argument for %s, line %zu\n",
+                    stype, i);
+                goto BAIL;
+            }
+        } else {
+            if (arg && arg[0] == '&') {
+                printf("[FATAL] a variable is an unsupported argument for %s, line %zu\n",
+                    stype, i);
+                goto BAIL;
+            }
+        }
+        if ((arg && arg[0] != '&')
+                && (atof(arg) == 0.0 && strcmp(arg, "0") && strcmp(arg, "0.0"))) {
+            printf("[FATAL] invalid numerical constant on line %zu\n", i);
             goto BAIL;
         }
         // We need to give each unique variable their own RAM index as I'm not
