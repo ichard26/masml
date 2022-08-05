@@ -13,6 +13,10 @@
 // - https://www.databasesandlife.com/position-of-the-star-when-declaring-c-pointers/
 // - https://stackoverflow.com/a/64339233/
 // - https://cplusplus.com/reference/cstring/memset/
+// - https://stackoverflow.com/questions/47202557/what-is-a-designated-initializer-in-c
+// - https://stackoverflow.com/questions/24263291/define-a-makefile-variable-using-a-env-variable-or-a-default-value
+// - https://stackoverflow.com/questions/14562845/why-does-passing-char-as-const-char-generate-a-warning
+// - https://stackoverflow.com/questions/9642732/parsing-command-line-arguments-in-c
 
 #include <assert.h>
 #include <math.h>
@@ -247,20 +251,19 @@ Program *parse(char *ppbuf[])
                     }
                     // NOTE: the extra space realloc provides probably won't be NULLed so
                     // we have to do calloc's job ourselves >.<
-                    memset(new_variables + 1, 0, 50);
+                    memset(new_variables + 1, 0, sizeof(char *) * 50);
                     variables = new_variables;
                     variables_size += 50;
                 }
             }
         }
-        // We can *finally* prepare the final Instruction struct :D
+        // We can *finally* prepare the final Instruction struct 🎉
         if (arg && arg[0] == '&') {
             printf("[LINE %-3zu] %-13s %-7s %s -> ram[%zu]\n", i, stype, reg, arg, var_index);
         } else {
             printf("[LINE %-3zu] %-13s %-7s %s\n", i, stype, reg, arg);
         }
-        Instruction instr;
-        instr.type = type;
+        Instruction instr = { .type = type };
         if (reg == NULL) {
             instr.reg = REG_NONE;
         } else {
@@ -279,11 +282,12 @@ Program *parse(char *ppbuf[])
         prog->instrs[prog->instr_count] = instr;
         prog->instr_count++;
         if (prog->instr_count >= instrs_size) {
-            prog->instrs = realloc(prog->instrs, sizeof(Instruction) * (instrs_size + 100));
-            if (prog->instrs == NULL) {
+            Instruction *new_instrs = realloc(prog->instrs, sizeof(Instruction) * (instrs_size + 100));
+            if (new_instrs == NULL) {
                 printf("[FATAL] failed to realloc `prog->instrs`\n");
                 goto BAIL;
             }
+            prog->instrs = new_instrs;
             instrs_size += 100;
         }
 SKIP_LINE:
