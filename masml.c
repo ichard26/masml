@@ -404,6 +404,9 @@ int main(int argc, char *argv[])
         return 2;
     }
     char **ppbuf = read_file(argv[1]);
+    if (ppbuf == NULL) {
+        return 1;
+    }
 
     // NOTE: `ppbuf` is ruined after parsing, we can and should only free it afterwards.
     Program *prog = parse(ppbuf);
