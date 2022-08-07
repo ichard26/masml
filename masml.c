@@ -17,6 +17,9 @@
 // - https://stackoverflow.com/questions/24263291/define-a-makefile-variable-using-a-env-variable-or-a-default-value
 // - https://stackoverflow.com/questions/14562845/why-does-passing-char-as-const-char-generate-a-warning
 // - https://stackoverflow.com/questions/9642732/parsing-command-line-arguments-in-c
+// - https://stackoverflow.com/questions/4647665/why-cast-an-unused-function-parameter-value-to-void
+
+#include "clikit.h"
 
 #include <assert.h>
 #include <math.h>
@@ -24,6 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define NELEMS(x) (sizeof(x) / sizeof(x[0]))
 
 #define RAM_SIZE 1000
 
@@ -64,7 +69,7 @@ typedef struct {
 } Program;
 
 
-void free_char_ppbuf(char **ppbuf)
+static void free_char_ppbuf(char **ppbuf)
 {
     for (size_t i = 0; ppbuf[i]; i++) {
         free(ppbuf[i]);
@@ -72,7 +77,7 @@ void free_char_ppbuf(char **ppbuf)
     free(ppbuf);
 }
 
-char **read_file(char const *filepath)
+static char **read_file(char const *filepath)
 {
     FILE *fp = fopen(filepath, "r");
     if (fp == NULL) {
@@ -121,7 +126,7 @@ BAIL:
     return NULL;
 }
 
-bool find_string(char * const strings[], char * const target, size_t *index)
+static bool find_string(char * const strings[], char * const target, size_t *index)
 {
     for (*index = 0; strings[*index]; (*index)++) {
         if (strcmp(strings[*index], target) == 0) {
@@ -142,7 +147,7 @@ void free_program(Program *program)
     free(program);
 }
 
-Program *parse(char *ppbuf[])
+Program *parse(char *ppbuf[], bool debug)
 {
     Program *prog = malloc(sizeof(*prog));
     size_t variables_size = 15;
@@ -258,10 +263,13 @@ Program *parse(char *ppbuf[])
             }
         }
         // We can *finally* prepare the final Instruction struct 🎉
-        if (arg && arg[0] == '&') {
-            printf("[LINE %-3zu] %-13s %-7s %s -> ram[%zu]\n", i, stype, reg, arg, var_index);
-        } else {
-            printf("[LINE %-3zu] %-13s %-7s %s\n", i, stype, reg, arg);
+        if (debug) {
+            if (arg && arg[0] == '&') {
+                printf("[LINE %-3zu] %-13s %-7s %s -> ram[%zu]\n",
+                    i, stype, reg, arg, var_index);
+            } else {
+                printf("[LINE %-3zu] %-13s %-7s %s\n", i, stype, reg, arg);
+            }
         }
         Instruction instr = { .type = type };
         if (reg == NULL) {
@@ -305,7 +313,7 @@ BAIL:
     return NULL;
 }
 
-double execute(Program program)
+double execute(Program program, bool debug)
 {
     double reg = 0, reg_b = 0;
     double *target_reg = NULL;
@@ -313,9 +321,11 @@ double execute(Program program)
     double ram[RAM_SIZE] = {0};
     for (size_t i = 0; i < program.instr_count; i++) {
         Instruction instr = program.instrs[i];
-        // printf("[DEBUG] executing %s (index %zu) using register %d with argument %f\n",
-        //     instruction_type_names[instr.type], i, instr.reg, instr.arg ? *instr.arg: -1.0);
-        // printf("[DEBUG]   registerA: %f, registerB: %f\n", reg, reg_b);
+        if (debug) {
+            printf("[DEBUG] executing %s (index %zu) using register %d with argument %f\n",
+                instruction_type_names[instr.type], i, instr.reg, instr.arg ? *instr.arg: -1.0);
+            printf("[DEBUG]   registerA: %f, registerB: %f\n", reg, reg_b);
+        }
         if (instr.reg == REG_NONE) {
             target_reg = NULL;
         } else if (instr.reg == REG_A) {
@@ -396,27 +406,45 @@ double execute(Program program)
 
 int main(int argc, char *argv[])
 {
-    if (argc > 2) {
-        printf("[FATAL] too many arguments, masml.c: [program.masml]\n");
+    (void)argc;
+
+    CLIArg cli_args[] = { { .id = "program" } };
+    CLIOpt cli_opts[] = {
+        { .id = "result", .name = "show-result", .is_flag = true },
+        { .id = "debug-parser", .name = "debug-parser", .is_flag = true },
+        { .id = "debug-vm", .name = "debug-vm", .is_flag = true },
+    };
+    CLI *cli = setup_cli(cli_args, NELEMS(cli_args), cli_opts, NELEMS(cli_opts));
+    if (!parse_cli(cli, argv)) {
+        free_cli(cli);
         return 2;
-    } else if (argc == 1) {
+    }
+    char const *filepath = cli_get_string(cli, "program");
+    bool show_result = cli_get_bool(cli, "result");
+    bool debug_parser = cli_get_bool(cli, "debug-parser");
+    bool debug_vm = cli_get_bool(cli, "debug-vm");
+    free_cli(cli);
+
+    if (filepath == NULL) {
         printf("[FATAL] please pass a .masml file, masml.c: [program.masml]\n");
         return 2;
     }
-    char **ppbuf = read_file(argv[1]);
+    char **ppbuf = read_file(filepath);
     if (ppbuf == NULL) {
         return 1;
     }
 
     // NOTE: `ppbuf` is ruined after parsing, we can and should only free it afterwards.
-    Program *prog = parse(ppbuf);
+    Program *prog = parse(ppbuf, debug_parser);
     free_char_ppbuf(ppbuf);
     if (prog == NULL) {
         return 1;
     }
 
-    double result = execute(*prog);
-    // printf("[RESULT] %f\n", result);
+    double result = execute(*prog, debug_vm);
+    if (show_result) {
+        printf("[RESULT] %f\n", result);
+    }
 
     free_program(prog);
     return 0;
