@@ -17,6 +17,30 @@ and VM. You should see the following output:
 
 ```console
 $ ./masml factor-finder.masml
+[OUTPUT] 1.000000
+[OUTPUT] 27.000000
+[OUTPUT] 3.000000
+[OUTPUT] 9.000000
+[OUTPUT] 9.000000
+[OUTPUT] 3.000000
+[OUTPUT] 27.000000
+[OUTPUT] 1.000000
+```
+
+There are three flags available: `--show-result`, `--debug-parser`, and `--debug-vm`. The
+first simply shows the value of the first VM register on termination. The other two enable
+debug output for the parser and VM respectively.
+
+For the parser, they show you the parsed instructions, what registers they're using and
+if they have an argument (and if so, whether it's a variable or a constant). For the VM,
+they log each instruction executed along with some details about the VM's internal state
+before the instruction is executed.
+
+Here's an example rerun with some flags. (`--debug-vm` is *very* noisy so it isn't
+included here)
+
+```console
+$ ./masml factor-finder.masml --show-result --debug-parser
 [LINE 1  ] SET-REGISTER  $1      27
 [LINE 2  ] STORE         $1      &product -> ram[0]
 [LINE 5  ] ADD           $1      1
@@ -43,11 +67,8 @@ $ ./masml factor-finder.masml
 [OUTPUT] 3.000000
 [OUTPUT] 27.000000
 [OUTPUT] 1.000000
+[RESULT] 1.000000
 ```
-
-By default, I have the parser debug printfs uncommented. They show you the parsed
-instructions, what registers they're using and if they have an argument (and if so,
-whether it's a variable or a constant).
 
 ### Platform compatibility
 
@@ -143,4 +164,3 @@ the parser (lines with only whitespace probably break the parser right now thoug
   simply as `double ram[1000] = {0}`)
 - Support programs with lines of (practically) unlimited length (limit is 64 characters
   right now)
-- Add a debug flag instead of commenting out and uncommenting printfs :)
