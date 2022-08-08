@@ -408,16 +408,18 @@ int main(int argc, char *argv[])
 {
     (void)argc;
 
+    char const * const desc = "Richard's silly ASM-like language.";
     CLIArg cli_args[] = { { .id = "program" } };
     CLIOpt cli_opts[] = {
         { .id = "result", .name = "show-result", .is_flag = true },
         { .id = "debug-parser", .name = "debug-parser", .is_flag = true },
         { .id = "debug-vm", .name = "debug-vm", .is_flag = true },
     };
-    CLI *cli = setup_cli(cli_args, NELEMS(cli_args), cli_opts, NELEMS(cli_opts));
-    if (!parse_cli(cli, argv)) {
+    CLI *cli = setup_cli(argv[0], desc, cli_args, NELEMS(cli_args), cli_opts, NELEMS(cli_opts));
+    ParseStatus s = parse_cli(cli, argv);
+    if (s) {
         free_cli(cli);
-        return 2;
+        return s == PARSE_HELP ? 0 : 2;
     }
     char const *filepath = cli_get_string(cli, "program");
     bool show_result = cli_get_bool(cli, "result");

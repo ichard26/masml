@@ -5,8 +5,8 @@
 // - https://en.cppreference.com/w/c/language/storage_duration
 // - https://c-faq.com/decl/spiral.anderson.html
 
-#ifndef CLIKIT_H
-#define CLIKIT_H
+#ifndef ICHARD26_CLIKIT_H
+#define ICHARD26_CLIKIT_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -22,6 +22,8 @@ typedef struct {
 } CLIOpt;
 
 typedef struct {
+    char const *name;
+    char const *desc;
     CLIArg *args;
     CLIOpt *opts;
     char const **opt_names;
@@ -32,11 +34,22 @@ typedef struct {
     char const **parsed_argv;
 } CLI;
 
-CLI *setup_cli(CLIArg args[], size_t arg_count, CLIOpt opts[], size_t opt_count);
-bool parse_cli(CLI *cli, char *argv[]);
+typedef enum {
+    PARSE_OK = 0, PARSE_HELP,
+    PARSE_INVALID_PARAMETER, PARSE_MISSING_PARAMETER,
+    PARSE_UNKNOWN_OPT, PARSE_TOO_MANY_ARGS,
+} ParseStatus;
+
+CLI *setup_cli(char const *name, char const *desc,
+                   CLIArg args[], size_t arg_count, CLIOpt opts[], size_t opt_count);
+ParseStatus parse_cli(CLI *cli, char *argv[]);
 void free_cli(CLI *cli);
 
 char const *cli_get_string(CLI *cli, char const * const id);
 bool cli_get_bool(CLI *cli, char const * const id);
+
+void print_cli_usage(CLI *cli);
+void print_cli_full_help(CLI *cli);
+void print_cli_parse_error(CLI *cli, char const *format, ...);
 
 #endif

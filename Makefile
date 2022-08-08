@@ -3,7 +3,7 @@ BASE_FLAGS := -g -std=c11 -Wall -Wextra -Wconversion -pedantic
 BIN := masml
 
 SRC := masml.c clikit.c
-OBJ = $(SRC:.c=.o)
+OBJ := $(SRC:.c=.o)
 
 DIR := build
 DEBUG_DIR := $(DIR)/debug
@@ -15,7 +15,7 @@ build-debug-asan: BASE_FLAGS += -fsanitize=address -fsanitize=undefined \
 build-release: BASE_FLAGS += -g0 -O3
 
 $(DEBUG_DIR)/%.o $(REL_DIR)/%.o: %.c
-	$(CC) -c $(BASE_FLAGS) $(CFLAGS) $< -o $@
+	$(CC) -c $< -o $@ $(BASE_FLAGS) $(CFLAGS)
 
 .PHONY: clean setup-build build-debug-asan build-release
 
