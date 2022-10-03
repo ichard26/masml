@@ -2,6 +2,7 @@
 // - https://stackoverflow.com/questions/53579909/dot-initialization-struct-after-malloc
 // - https://stackoverflow.com/questions/2963394/finding-character-in-string-c-language
 // - https://stackoverflow.com/questions/1079832/how-can-i-configure-my-makefile-for-debug-and-release-builds
+// - https://rextester.com/EBRBK55982
 
 #include "clikit.h"
 
@@ -195,6 +196,9 @@ void print_cli_full_help(CLI *cli)
     print_cli_usage(cli);
     if (cli->desc) {
         printf("\n%s\n", cli->desc);
+    }
+    if (!cli->opt_count) {
+        return;
     }
     printf("\nOptions:\n");
     size_t opt_name_col_width = max_string_length(cli->opt_names, cli->opt_count);

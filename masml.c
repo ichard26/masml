@@ -287,8 +287,7 @@ Program *parse(char *ppbuf[], bool debug)
                 *(instr.arg) = atof(arg);
             }
         }
-        prog->instrs[prog->instr_count] = instr;
-        prog->instr_count++;
+        prog->instrs[prog->instr_count++] = instr;
         if (prog->instr_count >= instrs_size) {
             Instruction *new_instrs = realloc(prog->instrs, sizeof(Instruction) * (instrs_size + 100));
             if (new_instrs == NULL) {
