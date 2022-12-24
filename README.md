@@ -12,11 +12,11 @@ To get a debug build (note it has ASAN), simply run `make` from the root of your
 Otherwise, run `make build-release` for an optimized build. Afterwards, you'll have a `masal`
 executable with which you can pass a MASML program to.
 
-For example, you can run the `factor-finder.masml` program I wrote to test the parser
+For example, you can run the `examples/factor-finder.masml` program I wrote to test the parser
 and VM. You should see the following output:
 
 ```console
-$ ./masml factor-finder.masml
+$ ./masml examples/factor-finder.masml
 [OUTPUT] 1.000000
 [OUTPUT] 27.000000
 [OUTPUT] 3.000000
@@ -40,7 +40,7 @@ Here's an example rerun with some flags. (`--debug-vm` is *very* noisy so it isn
 included here)
 
 ```console
-$ ./masml factor-finder.masml --show-result --debug-parser
+$ ./masml examples/factor-finder.masml --show-result --debug-parser
 [LINE 1  ] SET-REGISTER  $1      27
 [LINE 2  ] STORE         $1      &product -> ram[0]
 [LINE 5  ] ADD           $1      1

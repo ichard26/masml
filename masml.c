@@ -18,6 +18,8 @@
 // - https://stackoverflow.com/questions/14562845/why-does-passing-char-as-const-char-generate-a-warning
 // - https://stackoverflow.com/questions/9642732/parsing-command-line-arguments-in-c
 // - https://stackoverflow.com/questions/4647665/why-cast-an-unused-function-parameter-value-to-void
+// - https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc
+// - https://stackoverflow.com/questions/172587/what-is-the-difference-between-g-and-gcc
 
 #include "clikit.h"
 
