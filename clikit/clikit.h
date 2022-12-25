@@ -11,13 +11,25 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#define SETUP_CLI(argv, desc, args, opts)       \
+    setup_cli(argv[0], desc,                    \
+        args, (sizeof(args) / sizeof(args[0])), \
+        opts, (sizeof(opts) / sizeof(opts[0])));
+#define PARSE_CLI_AND_MAYBE_RETURN(cli, argv) \
+    ParseStatus s = parse_cli(cli, argv);     \
+    if (s) {                                  \
+        free_cli(cli);                        \
+        return s == PARSE_HELP ? 0 : 2;       \
+    }
+
 typedef struct {
     char const * const id;
+    bool optional;
 } CLIArg;
 
 typedef struct {
     char const * const id;
-    char const * const name;
+    char const *name;
     bool is_flag;
 } CLIOpt;
 

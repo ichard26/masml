@@ -70,11 +70,14 @@ CLI *setup_cli(char const *name, char const *desc,
     }
     for (size_t i = 0; i < opt_count; i++) {
         cli->ids[arg_count + i] = opts[i].id;
+        if (opts[i].name == NULL) {
+            opts[i].name = opts[i].id;
+        }
         cli->opt_names[i] = opts[i].name;
     }
     cli->parsed_argv = calloc(sizeof(char *), MAX_PARAMETERS);
     if (cli->parsed_argv == NULL) {
-        return false;
+        return NULL;
     }
     return cli;
 }
@@ -105,7 +108,7 @@ ParseStatus parse_cli(CLI *cli, char *argv[])
         if (awaiting_option_value) {
             // Basically everything after an option's flag should be interpreted as its
             // value so this check comes first.
-            cli->parsed_argv[arg_count + (size_t)opt_i] = value;
+            cli->parsed_argv[arg_count + opt_i] = value;
             awaiting_option_value = false;
         } else if (!strcmp(value, "--") && !arguments_only) {
             // The first standalone double dash is usually interpreted as a signal
@@ -132,7 +135,7 @@ ParseStatus parse_cli(CLI *cli, char *argv[])
                 // but using `value` seems like the least surprising.
                 //
                 // NOTE: arguments precede options so we need to offset the option index.
-                cli->parsed_argv[arg_count + (size_t)opt_i] = value;
+                cli->parsed_argv[arg_count + opt_i] = value;
             } else {
                 // We'll have to process another argv string to get the option's value.
                 awaiting_option_value = true;
@@ -153,6 +156,10 @@ ParseStatus parse_cli(CLI *cli, char *argv[])
     // for (size_t i = 0; i < cli->parameter_count; i++) {
     //     printf("[CLIKIT] parsed[%zu, %s]='%s'\n", i, cli->ids[i], cli->parsed_argv[i]);
     // }
+    if (arguments_left && !cli->args[arg_i].optional) {
+        print_cli_parse_error(cli, "missing argument: $%s", cli->args[arg_i].id);
+        return PARSE_MISSING_PARAMETER;
+    }
     if (extra_args[0] != '\0') {
         print_cli_parse_error(cli, "got unexpected extra arguments: %s", extra_args);
         return PARSE_TOO_MANY_ARGS;

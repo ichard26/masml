@@ -20,6 +20,7 @@
 // - https://stackoverflow.com/questions/4647665/why-cast-an-unused-function-parameter-value-to-void
 // - https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc
 // - https://stackoverflow.com/questions/172587/what-is-the-difference-between-g-and-gcc
+// - https://stackoverflow.com/questions/50908313/does-standard-c-accept-0-as-an-initializer-for-any-struct
 
 #include "clikit.h"
 
@@ -29,8 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define NELEMS(x) (sizeof(x) / sizeof(x[0]))
 
 #define RAM_SIZE 1000
 
@@ -409,29 +408,20 @@ int main(int argc, char *argv[])
 {
     (void)argc;
 
-    char const * const desc = "Richard's silly ASM-like language.";
     CLIArg cli_args[] = { { .id = "program" } };
     CLIOpt cli_opts[] = {
         { .id = "result", .name = "show-result", .is_flag = true },
-        { .id = "debug-parser", .name = "debug-parser", .is_flag = true },
-        { .id = "debug-vm", .name = "debug-vm", .is_flag = true },
+        { .id = "debug-parser", .is_flag = true },
+        { .id = "debug-vm", .is_flag = true },
     };
-    CLI *cli = setup_cli(argv[0], desc, cli_args, NELEMS(cli_args), cli_opts, NELEMS(cli_opts));
-    ParseStatus s = parse_cli(cli, argv);
-    if (s) {
-        free_cli(cli);
-        return s == PARSE_HELP ? 0 : 2;
-    }
+    CLI *cli = SETUP_CLI(argv, "Richard's silly ASM-like language.", cli_args, cli_opts);
+    PARSE_CLI_AND_MAYBE_RETURN(cli, argv);
     char const *filepath = cli_get_string(cli, "program");
     bool show_result = cli_get_bool(cli, "result");
     bool debug_parser = cli_get_bool(cli, "debug-parser");
     bool debug_vm = cli_get_bool(cli, "debug-vm");
     free_cli(cli);
 
-    if (filepath == NULL) {
-        printf("[FATAL] please pass a .masml file, masml.c: [program.masml]\n");
-        return 2;
-    }
     char **ppbuf = read_file(filepath);
     if (ppbuf == NULL) {
         return 1;
