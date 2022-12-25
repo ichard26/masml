@@ -266,10 +266,11 @@ Program *parse(char *ppbuf[], bool debug)
         // We can *finally* prepare the final Instruction struct 🎉
         if (debug) {
             if (arg && arg[0] == '&') {
-                printf("[LINE %-3zu] %-13s %-7s %s -> ram[%zu]\n",
-                    i, stype, reg, arg, var_index);
+                printf("[LINE %-3zu] #%-3zu %-13s %-7s %s -> ram[%zu]\n",
+                    i, prog->instr_count, stype, reg, arg, var_index);
             } else {
-                printf("[LINE %-3zu] %-13s %-7s %s\n", i, stype, reg, arg);
+                printf("[LINE %-3zu] #%-3zu %-13s %-7s %s\n",
+                    i, prog->instr_count, stype, reg, arg);
             }
         }
         Instruction instr = { .type = type };
@@ -306,7 +307,7 @@ SKIP_LINE:
     return prog;
 
 BAIL:
-    printf("[LINE %zu] %s", i, line_copy);
+    printf("[LINE %-3zu] %s", i, line_copy);
     free(line_copy);
     free(variables);
     free_program(prog);
@@ -322,9 +323,9 @@ double execute(Program program, bool debug)
     for (size_t i = 0; i < program.instr_count; i++) {
         Instruction instr = program.instrs[i];
         if (debug) {
-            printf("[DEBUG] executing %s (index %zu) using register %d with argument %f\n",
-                instruction_type_names[instr.type], i, instr.reg, instr.arg ? *instr.arg: -1.0);
-            printf("[DEBUG]   registerA: %f, registerB: %f\n", reg, reg_b);
+            printf("[DEBUG] #%zu %s - register: %d - argument: %f\n",
+                i, instruction_type_names[instr.type], instr.reg, instr.arg ? *instr.arg: -1.0);
+            printf("[DEBUG]   regA: %f, regB: %f\n", reg, reg_b);
         }
         if (instr.reg == REG_NONE) {
             target_reg = NULL;

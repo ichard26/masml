@@ -43,24 +43,24 @@ included here)
 
 ```console
 $ ./masml examples/factor-finder.masml --show-result --debug-parser
-[LINE 1  ] SET-REGISTER  $1      27
-[LINE 2  ] STORE         $1      &product -> ram[0]
-[LINE 5  ] ADD           $1      1
-[LINE 6  ] STORE         $1      &loop_until -> ram[1]
-[LINE 7  ] SET-REGISTER  $2      1
-[LINE 12 ] LOAD          $1      &product -> ram[0]
-[LINE 13 ] MODULO        $1      (null)
-[LINE 14 ] GOTO-IF-NOT   $1      13
-[LINE 17 ] LOAD          $1      &loop_until -> ram[1]
-[LINE 18 ] ADD           $2      1
-[LINE 19 ] EQUAL         $1      (null)
-[LINE 20 ] GOTO-IF-NOT   $1      5
-[LINE 22 ] EXIT          (null)  (null)
-[LINE 25 ] LOAD          $1      &product -> ram[0]
-[LINE 26 ] DIVIDE        $1      (null)
-[LINE 27 ] PRINT         $2      (null)
-[LINE 28 ] PRINT         $1      (null)
-[LINE 29 ] GOTO          (null)  8
+[LINE 1  ] #0   SET-REGISTER  $1      27
+[LINE 2  ] #1   STORE         $1      &product -> ram[0]
+[LINE 5  ] #2   ADD           $1      1
+[LINE 6  ] #3   STORE         $1      &loop_until -> ram[1]
+[LINE 7  ] #4   SET-REGISTER  $2      1
+[LINE 12 ] #5   LOAD          $1      &product -> ram[0]
+[LINE 13 ] #6   MODULO        $1      (null)
+[LINE 14 ] #7   GOTO-IF-NOT   $1      13
+[LINE 17 ] #8   LOAD          $1      &loop_until -> ram[1]
+[LINE 18 ] #9   ADD           $2      1
+[LINE 19 ] #10  EQUAL         $1      (null)
+[LINE 20 ] #11  GOTO-IF-NOT   $1      5
+[LINE 22 ] #12  EXIT          (null)  (null)
+[LINE 25 ] #13  LOAD          $1      &product -> ram[0]
+[LINE 26 ] #14  DIVIDE        $1      (null)
+[LINE 27 ] #15  PRINT         $2      (null)
+[LINE 28 ] #16  PRINT         $1      (null)
+[LINE 29 ] #17  GOTO          (null)  8
 [OUTPUT] 1.000000
 [OUTPUT] 27.000000
 [OUTPUT] 3.000000
@@ -109,7 +109,7 @@ Read the target register and set a variable.
 
 **SET-REGISTER**
 
-Set the target register to a numerical constant (as specified as an argument).
+Write a numerical constant to the target register.
 
 **SWAP**
 
@@ -141,8 +141,8 @@ Unconditional jump to instruction X. Remember that instruction indexes start at 
 
 **GOTO-IF** / **GOTO-IF-NOT**
 
-If the target register is non-zero, jump to instruction X. Remember that instruction
-indexes start at zero!
+If the target register is non-zero (or zero with `GOTO-IF-NOT`), jump to instruction X.
+Remember that instruction indexes start at zero!
 
 **PRINT**
 
@@ -154,7 +154,7 @@ Stop execution.
 
 ______________________________________________________________________
 
-To include a comments, prefix the line with `#`. Comments and empty lines are ignored in
+To include a comment, prefix the line with `#`. Comments and empty lines are ignored in
 the parser (lines with only whitespace probably break the parser right now though).
 
 ## Tooling
