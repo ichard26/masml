@@ -21,8 +21,10 @@
 // - https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc
 // - https://stackoverflow.com/questions/172587/what-is-the-difference-between-g-and-gcc
 // - https://stackoverflow.com/questions/50908313/does-standard-c-accept-0-as-an-initializer-for-any-struct
+// - https://stackoverflow.com/questions/1856599/when-to-use-static-keyword-before-global-variables
 
-#include "clikit.h"
+#include "masml.h"
+#include "util.h"
 
 #include <assert.h>
 #include <math.h>
@@ -32,15 +34,6 @@
 #include <string.h>
 
 #define RAM_SIZE 1000
-
-typedef enum {
-    LOAD, STORE,
-    SET_REG, SWAP,
-    ADD, SUB, MUL, DIV, MOD,
-    EQUAL, NOT,
-    GOTO, GOTO_IF, GOTO_IF_NOT, EXIT,
-    PRINT
-} InstructionType;
 
 // TODO: find a better way of creating string arrays for enum members.
 const char * const instruction_type_names[] = {
@@ -56,86 +49,6 @@ static_assert((sizeof(instruction_type_names) / sizeof(instruction_type_names[0]
     "instruction_type_names is missing a InstructionType name!"
 );
 
-typedef enum { REG_NONE, REG_A, REG_B } RegisterID;
-
-typedef struct {
-    InstructionType type;
-    RegisterID reg;
-    double *arg;
-} Instruction;
-
-typedef struct {
-    Instruction *instrs;
-    size_t instr_count;
-} Program;
-
-
-static void free_char_ppbuf(char **ppbuf)
-{
-    for (size_t i = 0; ppbuf[i]; i++) {
-        free(ppbuf[i]);
-    }
-    free(ppbuf);
-}
-
-static char **read_file(char const *filepath)
-{
-    FILE *fp = fopen(filepath, "r");
-    if (fp == NULL) {
-        printf("[FATAL] can't open file: %s\n", filepath);
-        return NULL;
-    }
-
-    size_t allocated_lines = 100;
-    size_t line = 0;
-    char str[64];
-    char **ppbuf = calloc(sizeof(char *), allocated_lines);
-    if (ppbuf == NULL) {
-        printf("[FATAL] failed to malloc program ppbuf!\n");
-        goto BAIL;
-    }
-
-    while (!feof(fp)) {
-        if (fgets(str, sizeof(str), fp)) {
-            ppbuf[line] = malloc(sizeof(char) * strlen(str) + 1);
-            if (ppbuf[line] == NULL) {
-                printf("[FATAL] failed to malloc program ppbuf[%zu]\n", line);
-                goto BAIL;
-            }
-            strcpy(ppbuf[line], str);
-            line++;
-            if (line >= allocated_lines) {
-                allocated_lines += 100;
-                char **new_ppbuf = realloc(ppbuf, sizeof(ppbuf[0]) * allocated_lines);
-                if (new_ppbuf == NULL) {
-                    printf("[FATAL] failed to realloc program ppbuf[%zu]\n", line);
-                    goto BAIL;
-                }
-                ppbuf = new_ppbuf;
-            }
-        }
-    }
-    ppbuf[line] = NULL;
-    fclose(fp);
-    return ppbuf;
-
-BAIL:
-    if (ppbuf != NULL) {
-        free_char_ppbuf(ppbuf);
-    }
-    fclose(fp);
-    return NULL;
-}
-
-static bool find_string(char * const strings[], char * const target, size_t *index)
-{
-    for (*index = 0; strings[*index]; (*index)++) {
-        if (strcmp(strings[*index], target) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
 
 void free_program(Program *program)
 {
@@ -403,43 +316,4 @@ double execute(Program program, bool debug)
         }
     }
     return reg;
-}
-
-int main(int argc, char *argv[])
-{
-    (void)argc;
-
-    CLIArg cli_args[] = { { .id = "program" } };
-    CLIOpt cli_opts[] = {
-        { .id = "result", .name = "show-result", .is_flag = true },
-        { .id = "debug-parser", .is_flag = true },
-        { .id = "debug-vm", .is_flag = true },
-    };
-    CLI *cli = SETUP_CLI(argv, "Richard's silly ASM-like language.", cli_args, cli_opts);
-    PARSE_CLI_AND_MAYBE_RETURN(cli, argv);
-    char const *filepath = cli_get_string(cli, "program");
-    bool show_result = cli_get_bool(cli, "result");
-    bool debug_parser = cli_get_bool(cli, "debug-parser");
-    bool debug_vm = cli_get_bool(cli, "debug-vm");
-    free_cli(cli);
-
-    char **ppbuf = read_file(filepath);
-    if (ppbuf == NULL) {
-        return 1;
-    }
-
-    // NOTE: `ppbuf` is ruined after parsing, we can and should only free it afterwards.
-    Program *prog = parse(ppbuf, debug_parser);
-    free_char_ppbuf(ppbuf);
-    if (prog == NULL) {
-        return 1;
-    }
-
-    double result = execute(*prog, debug_vm);
-    if (show_result) {
-        printf("[RESULT] %f\n", result);
-    }
-
-    free_program(prog);
-    return 0;
 }

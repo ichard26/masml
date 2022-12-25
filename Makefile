@@ -1,9 +1,10 @@
 CC := clang
 BASE_FLAGS := -g -std=c11 -Wall -Wextra -Wconversion -pedantic -Iclikit
-BIN := masml
 
-SRC := masml.c
+vpath %.c src
+SRC := cli.c masml.c util.c
 OBJ := $(SRC:.c=.o) clikit.a
+BIN := masml
 
 DIR := build
 DEBUG_DIR := $(DIR)/debug
@@ -26,7 +27,7 @@ build-debug-asan: setup-build $(foreach o,$(OBJ),$(DEBUG_DIR)/$(o))
 build-release: setup-build $(foreach o,$(OBJ),$(REL_DIR)/$(o))
 	$(CC) $(filter %.o %.a,$^) -o $(BIN) $(BASE_FLAGS) -lm $(CFLAGS)
 
-$(DEBUG_DIR)/clikit.a $(REL_DIR)/clikit.a: setup-build
+%/clikit.a: setup-build
 	$(MAKE) -C clikit CC=$(CC) OUT=../$(notdir $@) DIR=$(realpath $(dir $@))/clikit
 
 setup-build:

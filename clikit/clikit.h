@@ -14,7 +14,7 @@
 #define SETUP_CLI(argv, desc, args, opts)       \
     setup_cli(argv[0], desc,                    \
         args, (sizeof(args) / sizeof(args[0])), \
-        opts, (sizeof(opts) / sizeof(opts[0])));
+        opts, (sizeof(opts) / sizeof(opts[0])))
 #define PARSE_CLI_AND_MAYBE_RETURN(cli, argv) \
     ParseStatus s = parse_cli(cli, argv);     \
     if (s) {                                  \
