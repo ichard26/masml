@@ -4,13 +4,15 @@
 
 Richard's silly ASM-like(-ish) language. This little project was meant both as a better
 implementation over my original Python one *and* as a way to get better at C. This is my
-second major piece of software written in C 🎉
+second major piece of software written in C. 🎉
 
 ## Usage
 
 To get a debug build (note it has ASAN), simply run `make` from the root of your checkout.
 Otherwise, run `make build-release` for an optimized build. Afterwards, you'll have a `masal`
 executable with which you can pass a MASML program to.
+
+> The preferred file extension for MASML programs is `.masml`.
 
 For example, you can run the `examples/factor-finder.masml` program I wrote to test the parser
 and VM. You should see the following output:
@@ -154,6 +156,27 @@ Stop execution.
 
 To include a comments, prefix the line with `#`. Comments and empty lines are ignored in
 the parser (lines with only whitespace probably break the parser right now though).
+
+## Tooling
+
+### Vim syntax highlighting
+
+A Vim syntax file can be found at `tools/masml.vim`. To install it and set up syntax higlighting:
+
+1. Create these files and directories if they don't exist:
+
+   ```php
+   $HOME/.vim/ftdetect/masml.vim
+   $HOME/.vim/syntax/masml.vim
+   ```
+
+2. Put the following in `$HOME/.vim/ftdetect/masml.vim`:
+
+   ```vim
+   autocmd BufRead,BufNewFile *.masml set filetype=masml
+   ```
+
+3. Copy and paste the contents of `tools/masml.vim` into `$HOME/.vim/syntax/masml.vim`
 
 ## Possible improvements
 
