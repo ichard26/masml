@@ -9,13 +9,13 @@ second major piece of software written in C. 🎉
 ## Usage
 
 To get a debug build (note it has ASAN), simply run `make` from the root of your checkout.
-Otherwise, run `make build-release` for an optimized build. Afterwards, you'll have a `masal`
-executable with which you can pass a MASML program to.
+Otherwise, run `make build-release` for an optimized build. Afterwards, you'll have a
+`masal` executable with which you can pass a MASML program to.
 
 > The preferred file extension for MASML programs is `.masml`.
 
-For example, you can run the `examples/factor-finder.masml` program I wrote to test the parser
-and VM. You should see the following output:
+For example, you can run the `examples/factor-finder.masml` program I wrote to test the
+parser and VM. You should see the following output:
 
 ```console
 $ ./masml examples/factor-finder.masml
@@ -33,10 +33,10 @@ There are three flags available: `--show-result`, `--debug-parser`, and `--debug
 first simply shows the value of the first VM register on termination. The other two enable
 debug output for the parser and VM respectively.
 
-For the parser, they show you the parsed instructions, what registers they're using and
-if they have an argument (and if so, whether it's a variable or a constant). For the VM,
-they log each instruction executed along with some details about the VM's internal state
-before the instruction is executed.
+For the parser, they show you the parsed instructions, what registers they're using and if
+they have an argument (and if so, whether it's a variable or a constant). For the VM, they
+log each instruction executed along with some details about the VM's internal state before
+the instruction is executed.
 
 Here's an example rerun with some flags. (`--debug-vm` is *very* noisy so it isn't
 included here)
@@ -74,10 +74,10 @@ $ ./masml examples/factor-finder.masml --show-result --debug-parser
 
 ### Platform compatibility
 
-`masal.c` targets C11 without using any POSIX specific features as far as I know, but
-I've only built and tested this code on my Ubuntu 20.04.04 x86-64 machine. It *should*
-work on other platforms, but I can't make any guarantees. And no, I'm not providing a VS
-build configuration, sorry Windows folks.
+`masal.c` targets C11 without using any POSIX specific features as far as I know, but I've
+only built and tested this code on my Ubuntu 20.04.04 x86-64 machine. It *should* work on
+other platforms, but I can't make any guarantees. And no, I'm not providing a VS build
+configuration, sorry Windows folks.
 
 Anyway, I'm still pretty awful at C. Expecting me to write portable C first try is a bit
 much :)
@@ -90,12 +90,12 @@ numerical constant (as an argument) and write to a register if it produces a res
 (eg. `&daylily`) and numerical constants (eg. `27`).
 
 Only `LOAD` and `STORE` can read and write a variable respectively. Actually, `PRINT` can
-also read a variable. All other instructions only interact with the two VM registers (which
-are simply double-precision float stack variables in the VM).
+also read a variable. All other instructions only interact with the two VM registers
+(which are simply double-precision float stack variables in the VM).
 
 Each instruction can have a register and/or an argument specified. How the register and
-argument are used is instruction-dependant. If a register specifier doesn't start with
-a dollarsign (`$`), it will be instead treated as an argument.
+argument are used is instruction-dependant. If a register specifier doesn't start with a
+dollarsign (`$`), it will be instead treated as an argument.
 
 Here are the available instructions and their semantics:
 
@@ -117,9 +117,9 @@ Replace the value stored in register A with what's in register B and vice versa.
 
 **ADD** / **SUBTRACT** / **MULTIPLY** / **DIVIDE** / **MODULO**
 
-Perform X mathematical operation with register A as the left operand and register B as
-the right operand if no numerical constant is specified. Otherwise, the left operand
-is the target register and the right operand is the constant.
+Perform X mathematical operation with register A as the left operand and register B as the
+right operand if no numerical constant is specified. Otherwise, the left operand is the
+target register and the right operand is the constant.
 
 In either case, the result is written to the target register.
 
@@ -152,7 +152,7 @@ If a variable is specified, print its value, otherwise print the target register
 
 Stop execution.
 
----
+______________________________________________________________________
 
 To include a comments, prefix the line with `#`. Comments and empty lines are ignored in
 the parser (lines with only whitespace probably break the parser right now though).
@@ -161,7 +161,8 @@ the parser (lines with only whitespace probably break the parser right now thoug
 
 ### Vim syntax highlighting
 
-A Vim syntax file can be found at `tools/masml.vim`. To install it and set up syntax higlighting:
+A Vim syntax file can be found at `tools/masml.vim`. To install it and set up syntax
+highlighting:
 
 1. Create these files and directories if they don't exist:
 
@@ -170,19 +171,19 @@ A Vim syntax file can be found at `tools/masml.vim`. To install it and set up sy
    $HOME/.vim/syntax/masml.vim
    ```
 
-2. Put the following in `$HOME/.vim/ftdetect/masml.vim`:
+1. Put the following in `$HOME/.vim/ftdetect/masml.vim`:
 
    ```vim
    autocmd BufRead,BufNewFile *.masml set filetype=masml
    ```
 
-3. Copy and paste the contents of `tools/masml.vim` into `$HOME/.vim/syntax/masml.vim`
+1. Copy and paste the contents of `tools/masml.vim` into `$HOME/.vim/syntax/masml.vim`
 
 ## Possible improvements
 
 - Implement goto labels since specifying instruction indexes is error-prone
-- Support `GOTO 0` (or a label pointing to the first instruction) properly (it may
-  or may not crash currently ¯\\\_(ツ)\_/¯)
+- Support `GOTO 0` (or a label pointing to the first instruction) properly (it may or may
+  not crash currently ¯\\\_(ツ)\_/¯)
 - Support an (practically) unlimited amount of variables (currently RAM is implemented
   simply as `double ram[1000] = {0}`)
 - Support programs with lines of (practically) unlimited length (limit is 64 characters

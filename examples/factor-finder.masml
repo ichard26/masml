@@ -1,7 +1,7 @@
 SET-REGISTER  $1  27
 STORE         $1  &product
 
-# Initalize the loop.
+# Initialize the loop.
 ADD           $1  1
 STORE         $1  &loop_until
 SET-REGISTER  $2  1

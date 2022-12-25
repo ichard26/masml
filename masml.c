@@ -54,7 +54,7 @@ const char * const instruction_type_names[] = {
     NULL
 };
 static_assert((sizeof(instruction_type_names) / sizeof(instruction_type_names[0]) == PRINT + 2),
-    "instruction_type_names is misssing a InstructionType name!"
+    "instruction_type_names is missing a InstructionType name!"
 );
 
 typedef enum { REG_NONE, REG_A, REG_B } RegisterID;
