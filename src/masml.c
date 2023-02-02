@@ -22,9 +22,11 @@
 // - https://stackoverflow.com/questions/172587/what-is-the-difference-between-g-and-gcc
 // - https://stackoverflow.com/questions/50908313/does-standard-c-accept-0-as-an-initializer-for-any-struct
 // - https://stackoverflow.com/questions/1856599/when-to-use-static-keyword-before-global-variables
+// - https://stackoverflow.com/questions/42056160/static-functions-declared-in-c-header-files
+// - https://softwareengineering.stackexchange.com/questions/285811/c-module-where-to-put-prototypes-and-definitions-that-do-not-belong-to-the-pub
 
-#include "masml.h"
 #include "util.h"
+#include "clikit.h"
 
 #include <assert.h>
 #include <math.h>
@@ -34,6 +36,28 @@
 #include <string.h>
 
 #define RAM_SIZE 1000
+
+typedef enum {
+    LOAD, STORE,
+    SET_REG, SWAP,
+    ADD, SUB, MUL, DIV, MOD,
+    EQUAL, NOT,
+    GOTO, GOTO_IF, GOTO_IF_NOT, EXIT,
+    PRINT
+} InstructionType;
+
+typedef enum { REG_NONE, REG_A, REG_B } RegisterID;
+
+typedef struct {
+    InstructionType type;
+    RegisterID reg;
+    double *arg;
+} Instruction;
+
+typedef struct {
+    Instruction *instrs;
+    size_t instr_count;
+} Program;
 
 // TODO: find a better way of creating string arrays for enum members.
 const char * const instruction_type_names[] = {
@@ -316,4 +340,43 @@ double execute(Program program, bool debug)
         }
     }
     return reg;
+}
+
+int main(int argc, char *argv[])
+{
+    (void)argc;
+
+    CLIArg cli_args[] = { { .id = "program" } };
+    CLIOpt cli_opts[] = {
+        { .id = "result", .name = "show-result", .is_flag = true },
+        { .id = "debug-parser", .is_flag = true },
+        { .id = "debug-vm", .is_flag = true },
+    };
+    CLI *cli = SETUP_CLI(argv, "Richard's silly ASM-like language.", cli_args, cli_opts);
+    PARSE_CLI_AND_MAYBE_RETURN(cli, argv);
+    char const *filepath = cli_get_string(cli, "program");
+    bool show_result = cli_get_bool(cli, "result");
+    bool debug_parser = cli_get_bool(cli, "debug-parser");
+    bool debug_vm = cli_get_bool(cli, "debug-vm");
+    free_cli(cli);
+
+    char **ppbuf = read_file(filepath);
+    if (ppbuf == NULL) {
+        return 1;
+    }
+
+    // NOTE: `ppbuf` is ruined after parsing, we can and should only free it afterwards.
+    Program *prog = parse(ppbuf, debug_parser);
+    free_char_ppbuf(ppbuf);
+    if (prog == NULL) {
+        return 1;
+    }
+
+    double result = execute(*prog, debug_vm);
+    if (show_result) {
+        printf("[RESULT] %f\n", result);
+    }
+
+    free_program(prog);
+    return 0;
 }

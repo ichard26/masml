@@ -2,7 +2,7 @@ CC := clang
 BASE_FLAGS := -g -std=c11 -Wall -Wextra -Wconversion -pedantic -Iclikit
 
 vpath %.c src
-SRC := cli.c masml.c util.c
+SRC := masml.c util.c
 OBJ := $(SRC:.c=.o) clikit.a
 BIN := masml
 
