@@ -261,7 +261,7 @@ double execute(Program program, bool debug)
         Instruction instr = program.instrs[i];
         if (debug) {
             printf("[DEBUG] #%zu %s - register: %d - argument: %f\n",
-                i, instruction_type_names[instr.type], instr.reg, instr.arg ? *instr.arg: -1.0);
+                i, instruction_type_names[instr.type], instr.reg, instr.arg ? *instr.arg: NAN);
             printf("[DEBUG]   regA: %f, regB: %f\n", reg, reg_b);
         }
         if (instr.reg == REG_NONE) {
